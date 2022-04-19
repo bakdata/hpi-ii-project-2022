@@ -1,0 +1,13 @@
+{
+  "name": "elasticsearch-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "topics": "corporate-events",
+    "input.data.format": "PROTOBUF",
+    "connection.url": "http://elasticsearch:9200",
+    "type.name": "corporates",
+    "key.ignore": "true",
+    "schema.ignore": "true",
+    "tasks.max": "1"
+  }
+}

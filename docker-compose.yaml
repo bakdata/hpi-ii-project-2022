@@ -1,0 +1,149 @@
+---
+version: '3'
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    container_name: zookeeper
+    hostname: zookeeper
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: zookeeper
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: kafka
+    ports:
+      # "`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-
+      # An important note about accessing Kafka from clients on other machines:
+      # -----------------------------------------------------------------------
+      #
+      # The config used here exposes port 29092 for _external_ connections to the broker
+      # i.e. those from _outside_ the docker network. This could be from the host machine
+      # running docker, or maybe further afield if you've got a more complicated setup.
+      # If the latter is true, you will need to change the value 'localhost' in
+      # KAFKA_ADVERTISED_LISTENERS to one that is resolvable to the docker host from those
+      # remote clients
+      #
+      # For connections _internal_ to the docker network, such as from other services
+      # and components, use kafka:9092.
+      #
+      # See https://rmoff.net/2018/08/02/kafka-listeners-explained/ for details
+      # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
+      # https://www.baeldung.com/kafka-docker-connection
+      # "`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL_SAME_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL_SAME_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_SAME_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_SCHEMA_REGISTRY_URL: "schema-registry:8081"
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.0.1
+    container_name: schema-registry
+    restart: always
+    depends_on:
+      - zookeeper
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:9092"
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+    ports:
+      - "8081:8081"
+
+  kafka-rest:
+    image: confluentinc/cp-kafka-rest:7.0.1
+    container_name: restproxy
+    restart: always
+    depends_on:
+      - kafka
+      - schema-registry
+    environment:
+      KAFKA_REST_BOOTSTRAP_SERVERS: "kafka:9092"
+      KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
+      KAFKA_REST_SCHEMA_REGISTRY_URL: "schema-registry:8081"
+      KAFKA_REST_HOST_NAME: kafka-rest
+      KAFKA_REST_DEBUG: "true"
+    ports:
+      - "8082:8082"
+
+  kowl:
+    image: quay.io/cloudhut/kowl:v1.5.0
+    container_name: kowl
+    restart: on-failure
+    hostname: kowl
+    volumes:
+      - ./kowl-config.yaml:/etc/kowl/kowl-config.yaml
+    ports:
+      - "8080:8080"
+    entrypoint: ./kowl --config.filepath=/etc/kowl/kowl-config.yaml
+    depends_on:
+      - kafka
+      - schema-registry
+
+  connect:
+    image: confluentinc/cp-kafka-connect:7.0.1
+    container_name: kafka-connect
+    hostname: connect
+    depends_on:
+      - zookeeper
+      - kafka
+      - schema-registry
+      - elasticsearch
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: kafka-connect
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.protobuf.ProtobufConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "io.confluent.connect.protobuf.ProtobufConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
+      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components,/data/connect-jars
+    volumes:
+      - ./connect/elastic-sink.json:/connect/elastic-sink.json
+    command:
+      - bash
+      - -c
+      - |
+        echo "Installing Connector"
+        confluent-hub install confluentinc/kafka-connect-elasticsearch:11.1.10 --no-prompt
+        confluent-hub install confluentinc/kafka-connect-protobuf-converter:7.1.0 --no-prompt
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run &
+        #
+        sleep infinity
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.2
+    container_name: elasticsearch
+    hostname: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"
