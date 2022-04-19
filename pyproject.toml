@@ -3,6 +3,7 @@ name = "hpi-ii-project-2022"
 version = "0.1.0"
 description = ""
 authors = ["raminqaf <ramin.gharib@bakdata.com>"]
+license = "MIT"
 readme = "README.md"
 repository = "https://github.com/bakdata/hpi-ii-project-2022"
 packages = [
