@@ -32,7 +32,7 @@ class RbProducer:
         )
 
         # It is a naive approach to flush after each produce this can be optimised
-        self.producer.flush()
+        self.producer.poll()
 
     @staticmethod
     def delivery_report(err, msg):

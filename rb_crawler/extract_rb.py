@@ -8,15 +8,14 @@ justiz_id = {"be": "F1103R"}
 black_list = [369803]
 
 
-class ExtractRb:
+class RbExtractor:
     def __init__(self, start_rb_id: int, land: str):
         self.rb_id = start_rb_id
         self.land = land
         self.producer = RbProducer()
 
     def extract(self):
-        # while True:
-        for self.rb_id in [367482, 454067, 503622, 600425]:
+        while True:
             if self.rb_id in black_list:
                 self.rb_id = self.rb_id + 1
                 continue
@@ -26,6 +25,7 @@ class ExtractRb:
             ).text
             selector = Selector(text=get)
             corporate = Corporate()
+            corporate.rb_id = self.rb_id
             company_code = self.extract_company_aktenzeichen(selector)
             event_date = selector.xpath("/html/body/font/table/tr[4]/td/text()").get()
             corporate.event_date = event_date
@@ -62,7 +62,7 @@ class ExtractRb:
             )
 
             if len(company_description_capital) == 2:
-                corporate.description = company_description_capital[0]
+                corporate.description = (company_description_capital[0])[1:-1]
                 corporate.capital = company_description_capital[1]
             else:
                 corporate.description = company_description_capital[0]
@@ -77,7 +77,7 @@ class ExtractRb:
 
     def handle_changes(self, corporate: Corporate, raw_text: str):
         print(f"Changes are made to company: {corporate.id}")
-        corporate.status = Status.Status.STATUS_ACTIVE
+        corporate.status = Status.STATUS_ACTIVE
 
         if "Sitz / Zweigniederlassung: Geschäftsanschrift: " in raw_text:
             corporate.event_type = "update::changeAddress"
@@ -94,7 +94,7 @@ class ExtractRb:
             removed_officer = Officer()
             removed_officer.index = int(officer_index[:-1])
             removed_officer.status = Status.STATUS_INACTIVE
-            removed_officer.first_name = officer_name[1].split(";")[0]
+            removed_officer.first_name = (officer_name[1].split(";")[0])[1:]
             removed_officer.last_name = officer_name[0].replace(officer_index, "")[1:]
             corporate.officers.append(removed_officer)
 
@@ -105,7 +105,6 @@ class ExtractRb:
             # print(new_officer)
 
             self.producer.produce_to_topic(corporate=corporate)
-        pass
 
     def handle_deletes(self, corporate: Corporate):
         print(f"Company {corporate.id} is inactive")

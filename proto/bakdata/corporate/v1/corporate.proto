@@ -12,6 +12,7 @@ message Corporate {
   string description = 7;
   string capital = 8;
   repeated Officer officers = 9;
+  uint32 rb_id = 10;
 }
 
 message Officer {
