@@ -1,3 +1,5 @@
+import logging
+
 from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.protobuf import ProtobufSerializer
@@ -6,6 +8,8 @@ from confluent_kafka.serialization import StringSerializer
 from build.gen.bakdata.corporate.v1 import corporate_pb2
 from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate
 from rb_crawler.constant import SCHEMA_REGISTRY_URL, BOOTSTRAP_SERVER, TOPIC
+
+log = logging.getLogger(__name__)
 
 
 class RbProducer:
@@ -26,7 +30,6 @@ class RbProducer:
         self.producer = SerializingProducer(producer_conf)
 
     def produce_to_topic(self, corporate: Corporate):
-
         self.producer.produce(
             topic=TOPIC, partition=-1, key=str(corporate.id), value=corporate, on_delivery=self.delivery_report
         )
@@ -50,9 +53,9 @@ class RbProducer:
             the objects along.
         """
         if err is not None:
-            print("Delivery failed for User record {}: {}".format(msg.key(), err))
+            log.error("Delivery failed for User record {}: {}".format(msg.key(), err))
             return
-        print(
+        log.info(
             "User record {} successfully produced to {} [{}] at offset {}".format(
                 msg.key(), msg.topic(), msg.partition(), msg.offset()
             )
