@@ -5,6 +5,7 @@ can find the documentation for setting up the project.
 
 ## Prerequisites
 
+- Install [Poetry](https://python-poetry.org/docs/#installation)
 - Install [Docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/)
 - Install [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/)
 - Install [jq](https://stedolan.github.io/jq/download/)
@@ -55,30 +56,7 @@ The value of the message contains more information like `event_name`, `event_dat
 is complex and needs a schema definition. We use [Protocol buffers](https://developers.google.com/protocol-buffers)
 to define our schema. You can use the [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/) to
 generate source code. You can use this generated source code to easily write and read your structured data to and
-from various data streams using a variety of languages. The protobuf schema for the values is shown below:
-
-```protobuf
-syntax = "proto3";
-
-package bakdata.corporate.v1;
-
-message Corporate {
-  string id = 1;
-  uint32 rb_id = 2;
-  string state = 3;
-  string reference_id = 4;
-  string event_date = 5;
-  string event_type = 6;
-  Status status = 7;
-  string information = 8;
-}
-
-enum Status {
-  STATUS_UNSPECIFIED = 0;
-  STATUS_INACTIVE = 1;
-  STATUS_ACTIVE = 2;
-}
-```
+from various data streams using a variety of languages.
 
 ### Kafka-Connect
 
@@ -91,7 +69,7 @@ to move the data from the `coporate-events` topic into the Elasticsearch.
 
 ## Setup
 
-This project uses [poetry](https://python-poetry.org/) as a build tool.
+This project uses [Poetry](https://python-poetry.org/) as a build tool.
 To install all the dependencies, just run `poetry install`.
 
 This project uses Protobuf for serializing and deserializing objects. We provided a
@@ -111,7 +89,9 @@ Use `docker-compose up -d` to start all the services: [Zookeeper](https://zookee
 Registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
 , [Kafka REST Proxy]((https://github.com/confluentinc/kafka-rest)), [Kowl](https://github.com/redpanda-data/kowl),
 [Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html),
-and [Elasticsearch](https://www.elastic.co/elasticsearch/).
+and [Elasticsearch](https://www.elastic.co/elasticsearch/). Depending on your system, it takes a couple of minutes before the services are up and running. You can use a tool like [lazydocker](https://github.com/jesseduffield/lazydocker)
+to check the status of the services.
+
 After all the services are up and running you can use the [`create-topic.sh`](./rb_crawler/scripts/create-topic.sh)
 script to create the `corporate-events` topic.
 This script uses the Kafka REST Proxy to communicate with Kafka.
@@ -132,7 +112,7 @@ through Kowl's UI dashboard or calling the deletion API in the [bash script prov
 You can start the crawler with the command below:
 
 ```shell
-python rb_cralwer/main.py --id $RB_ID --state $STATE
+poetry run python rb_cralwer/main.py --id $RB_ID --state $STATE
 ```
 
 The `--id` option is an integer, which determines the initial event in the handelsregisterbekanntmachungen to be
@@ -157,8 +137,7 @@ Options:
 
 ### Kowl
 
-[Kowl](https://github.com/redpanda-data/kowl) is a web application that helps you manage and debug your Kafka/Redpanda
-workloads effortlessly. You can create, update, and delete Kafka resources like Topics and Kafka Connect configs.
+[Kowl](https://github.com/redpanda-data/kowl) is a web application that helps you manage and debug your Kafka workloads effortlessly. You can create, update, and delete Kafka resources like Topics and Kafka Connect configs.
 You can see Kowl's dashboard in your browser under http://localhost:8080.
 
 ### Elasticsearch
