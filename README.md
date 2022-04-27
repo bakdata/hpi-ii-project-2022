@@ -7,7 +7,8 @@ can find the documentation for setting up the project.
 
 - Install [Poetry](https://python-poetry.org/docs/#installation)
 - Install [Docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/)
-- Install [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/)
+- Install [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/). If you are using windows you can
+  use [this guide](https://www.geeksforgeeks.org/how-to-install-protocol-buffers-on-windows/)
 - Install [jq](https://stedolan.github.io/jq/download/)
 
 ## Architecture
@@ -32,15 +33,20 @@ curl -X GET  "https://www.handelsregisterbekanntmachungen.de/skripte/hrb.php?rb_
 ### RB Crawler
 
 The Registerbekanntmachung crawler (rb_crawler) sends a get request to the link above with parameters (`rb_id`
-and `land_abk`)
-passed to it and extracts the information from the response. The crawler uses the generated code from
+and `land_abk`) passed to it and extracts the information from the response.
+
+We use [Protocol buffers](https://developers.google.com/protocol-buffers)
+to define our [schema](./proto/bakdata/corporate/v1/corporate.proto).
+
+The crawler uses the generated model class (i.e., `Corporate` class) from
 the [protobuf schema](./proto/bakdata/corporate/v1/corporate.proto).
-It creates a `Corporate` object with the fields defined in the schema. The crawler fills the object fields with the
+We will explain furthur how you can generate this class using the protobuf compiler.
+The compiler creates a `Corporate` class with the fields defined in the schema. The crawler fills the object fields with
+the
 extracted data from the website.
 It then serializes the `Corporate` object to bytes so that Kafka can read it and produces it to the `corporate-events`
-topic. After that, it increments
-the `rb_id` value and sends another GET request. This process continues until the end of the announcements is reached,
-and the crawler will stop automatically.
+topic. After that, it increments the `rb_id` value and sends another GET request.
+This process continues until the end of the announcements is reached, and the crawler will stop automatically.
 
 ### corporate-events topic
 
@@ -53,16 +59,14 @@ the
 key will look like this: `rp_56267`.
 
 The value of the message contains more information like `event_name`, `event_date`, and more. Therefore, the value type
-is complex and needs a schema definition. We use [Protocol buffers](https://developers.google.com/protocol-buffers)
-to define our schema. You can use the [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/) to
-generate source code. You can use this generated source code to easily write and read your structured data to and
-from various data streams using a variety of languages.
+is complex and needs a schema definition.
 
-### Kafka-Connect
+### Kafka Connect
 
-[Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html) is a tool to move large data sets into (
-source) and out (sink) of Kafka. Here we only use the Sink connector, which consumes data from a Kafka topic into a
-secondary index such as Elasticsearch.
+[Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html) is a tool to move large data sets into
+(source) and out (sink) of Kafka.
+Here we only use the Sink connector, which consumes data from a Kafka topic into a secondary index such as
+Elasticsearch.
 
 We use the [Elasticsearch Sink Connector](https://docs.confluent.io/kafka-connect-elasticsearch/current/overview.html)
 to move the data from the `coporate-events` topic into the Elasticsearch.
@@ -74,10 +78,10 @@ To install all the dependencies, just run `poetry install`.
 
 This project uses Protobuf for serializing and deserializing objects. We provided a
 simple [protobuf schema](./proto/bakdata/corporate/v1/corporate.proto).
-Furthermore, you need to generate the Python code from the proto file.
-To do so run the [`generate-proto.sh`](./generate-proto.sh)
-script.
-This script uses the Protobuf compiler to generate the model class under the `build/gen/bakdata/corporate/v1` folder
+Furthermore, you need to generate the Python code for the model class from the proto file.
+To do so run the [`generate-proto.sh`](./generate-proto.sh) script.
+This script uses the [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/) to generate the model class
+under the `build/gen/bakdata/corporate/v1` folder
 with the name `corporate_pb2.py`.
 
 ## Run
@@ -89,12 +93,10 @@ Use `docker-compose up -d` to start all the services: [Zookeeper](https://zookee
 Registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
 , [Kafka REST Proxy]((https://github.com/confluentinc/kafka-rest)), [Kowl](https://github.com/redpanda-data/kowl),
 [Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html),
-and [Elasticsearch](https://www.elastic.co/elasticsearch/). Depending on your system, it takes a couple of minutes before the services are up and running. You can use a tool like [lazydocker](https://github.com/jesseduffield/lazydocker)
+and [Elasticsearch](https://www.elastic.co/elasticsearch/). Depending on your system, it takes a couple of minutes
+before the services are up and running. You can use a tool
+like [lazydocker](https://github.com/jesseduffield/lazydocker)
 to check the status of the services.
-
-After all the services are up and running you can use the [`create-topic.sh`](./rb_crawler/scripts/create-topic.sh)
-script to create the `corporate-events` topic.
-This script uses the Kafka REST Proxy to communicate with Kafka.
 
 ### Kafka Connect
 
@@ -137,7 +139,8 @@ Options:
 
 ### Kowl
 
-[Kowl](https://github.com/redpanda-data/kowl) is a web application that helps you manage and debug your Kafka workloads effortlessly. You can create, update, and delete Kafka resources like Topics and Kafka Connect configs.
+[Kowl](https://github.com/redpanda-data/kowl) is a web application that helps you manage and debug your Kafka workloads
+effortlessly. You can create, update, and delete Kafka resources like Topics and Kafka Connect configs.
 You can see Kowl's dashboard in your browser under http://localhost:8080.
 
 ### Elasticsearch
