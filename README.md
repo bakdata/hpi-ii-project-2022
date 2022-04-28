@@ -165,3 +165,9 @@ curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' 
 ```
 "reference_id":"HRB 41865"
 ```
+
+## Teardown
+You can stop and remove all the resources by running:
+```shell
+docker-compose down
+```

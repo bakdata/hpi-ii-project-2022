@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 
 import requests
 from parsel import Selector
@@ -44,6 +45,8 @@ class RbExtractor:
 
     def send_request(self) -> str:
         url = f"https://www.handelsregisterbekanntmachungen.de/skripte/hrb.php?rb_id={self.rb_id}&land_abk={self.state}"
+        # For graceful crawling! Remove this at your own risk!
+        sleep(0.5)
         return requests.get(url=url).text
 
     @staticmethod
