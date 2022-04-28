@@ -114,7 +114,7 @@ through Kowl's UI dashboard or calling the deletion API in the [bash script prov
 You can start the crawler with the command below:
 
 ```shell
-poetry run python rb_cralwer/main.py --id $RB_ID --state $STATE
+poetry run python rb_crawler/main.py --id $RB_ID --state $STATE
 ```
 
 The `--id` option is an integer, which determines the initial event in the handelsregisterbekanntmachungen to be
