@@ -8,8 +8,8 @@ message Transparency {
     uint32 employee_min = 3;
     uint32 employee_max = 4;
     bool refuse_expenses = 5;
-    optional uint32 expenses_min = 6;
-    optional uint32 expenses_max = 7;
+    optional uint64 expenses_min = 6;
+    optional uint64 expenses_max = 7;
     optional string fiscal_year = 8;
     bool refuse_allowance = 9;
     bool refuse_donation = 10;
@@ -41,7 +41,7 @@ message MembershipEntries {
 message Donators {
     string name = 1;
     string fiscal_year = 2;
-    uint32 donation_euro = 3;
+    uint64 donation_euro = 3;
 }
 
 message fieldsOfInterest{
