@@ -38,6 +38,8 @@ class TrExtractor():
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'html.parser')
         return_list = []
+        name = soup.find("h3").contents
+        name = name[0]
 
         for item in soup.find(id="public-versions-entry").find_all('option'):
             sub_url = item.attrs['value']
@@ -52,6 +54,8 @@ class TrExtractor():
                     break
             
             result = result.json()
+            #kinda hacky and bad but come on why isnt the name in the JSON?
+            result["name"] = name
             return_list.append(result)
 
             log.info(f"Length of return list {len(return_list)}")
@@ -60,6 +64,8 @@ class TrExtractor():
 
     def _extract_protobuf_from_dict(self, event_dict: dict):
         trans = Transparency()
+
+        trans.name = event_dict["name"]
 
         trans.register_number = event_dict["registerNumber"]
         trans.entry_id = event_dict["registerEntryDetail"]["id"]

@@ -21,6 +21,7 @@ message Transparency {
     repeated MembershipEntries organisations = 16;
     repeated Donators companies = 17;
     repeated fieldsOfInterest fields = 18;
+    string name = 19;
 }
 
 message LegalRepresentatives {
