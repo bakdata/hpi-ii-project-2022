@@ -16,12 +16,29 @@ message Transparency {
     optional bool donation_information_required = 11;
     string firstPublicationDate = 12;
     bool account_inactive = 13;
-    repeated LegalRepresentatives persons = 14;
-    repeated NamedEmployees employees = 15;
-    repeated MembershipEntries organisations = 16;
-    repeated Donators companies = 17;
-    repeated fieldsOfInterest fields = 18;
-    string name = 19;
+    repeated LobbyistIdentity lobbyist = 14;
+    repeated LegalRepresentatives persons = 15;
+    repeated NamedEmployees employees = 16;
+    repeated MembershipEntries organisations = 17;
+    repeated Donators companies = 18;
+    repeated fieldsOfInterest fields = 19;
+    repeated ClientOrganizations clients = 20;
+    string name = 21;
+}
+
+message LobbyistIdentity {
+    string identity = 1;
+    string name = 2;
+    Address adress = 3;
+}
+
+message Address {
+    string street = 1;
+    uint32 streetNumber = 2;
+    uint32 zipCode = 3;
+    string city = 4;
+    string country = 5;
+
 }
 
 message LegalRepresentatives {
@@ -48,4 +65,9 @@ message Donators {
 message fieldsOfInterest{
     string name = 1;
     string description = 2;
+}
+
+message ClientOrganizations{
+    string name = 1;
+    Address adress = 2;
 }

@@ -3,7 +3,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-from build.gen.student.academic.v1.transparency_pb2 import Transparency, LegalRepresentatives, NamedEmployees, MembershipEntries, Donators, fieldsOfInterest
+from build.gen.student.academic.v1.transparency_pb2 import Transparency, LegalRepresentatives, NamedEmployees, MembershipEntries, Donators, fieldsOfInterest, ClientOrganizations
 from tr_producer import TrProducer
 from tr_crawler.constant import LOBBY_BASE_URL, MAX_ATTEMPTS
 
@@ -83,9 +83,17 @@ class TrExtractor():
 
         if "donationInformationRequired" in event_dict["registerEntryDetail"].keys():
             trans.donation_information_required = event_dict["registerEntryDetail"]["donationInformationRequired"]
-        
+
         trans.firstPublicationDate = event_dict["registerEntryDetail"]["account"]["firstPublicationDate"]
         trans.account_inactive = event_dict["registerEntryDetail"]["account"]["inactive"]
+
+        trans.lobbyistIdentity.identity = event_dict["registerEntryDetail"]["lobbyistIdentity"]["identity"]
+        trans.lobbyistIdentity.name = event_dict["registerEntryDetail"]["lobbyistIdentity"]["name"]
+        trans.lobbyistIdentity.address.street = event_dict["registerEntryDetail"]["lobbyistIdentity"]["address"]["street"]
+        trans.lobbyistIdentity.address.streetNumber = event_dict["registerEntryDetail"]["lobbyistIdentity"]["address"]["streetNumber"]
+        trans.lobbyistIdentity.address.zipCode = event_dict["registerEntryDetail"]["lobbyistIdentity"]["address"]["zipCode"]
+        trans.lobbyistIdentity.address.city = event_dict["registerEntryDetail"]["lobbyistIdentity"]["address"]["city"]
+        trans.lobbyistIdentity.address.country = event_dict["registerEntryDetail"]["lobbyistIdentity"]["address"]["country"]["code"]
 
         persons_list = []
         if "legalRepresentatives" in event_dict["registerEntryDetail"]["lobbyistIdentity"].keys():
@@ -96,7 +104,7 @@ class TrExtractor():
                 legalRep.function = (person["function"])
                 persons_list.append(legalRep)
             trans.persons.extend(persons_list)
-        
+
         employees_list = []
         if "namedEmployees" in event_dict["registerEntryDetail"]["lobbyistIdentity"].keys():
             for person in event_dict["registerEntryDetail"]["lobbyistIdentity"]["namedEmployees"]:
@@ -105,7 +113,7 @@ class TrExtractor():
                 employees.last_name = (person["lastName"])
                 employees_list.append(employees)
         trans.employees.extend(employees_list)
-        
+
         organisations_list = []
         if "membershipEntries" in event_dict["registerEntryDetail"]["lobbyistIdentity"].keys():
             for organisation in event_dict["registerEntryDetail"]["lobbyistIdentity"]["membershipEntries"]:
@@ -133,6 +141,19 @@ class TrExtractor():
                     fields.description = (field["fieldOfInterestText"])
                 fields_list.append(fields)
             trans.fields.extend(fields_list)
+
+        clients_list = []
+        if "clientOrganizations" in event_dict["registerEntryDetail"].keys():
+            for client in event_dict["registerEntryDetail"]["clientOrganizations"]:
+                clients = ClientOrganizations()
+                clients.name = (client["name"])
+                clients.adress.street = (client["address"]["street"])
+                clients.adress.streetNumber = (client["address"]["streetNumber"])
+                clients.adress.zipCode = (client["address"]["zipCode"])
+                clients.adress.city = (client["address"]["city"])
+                clients.adress.country = (client["address"]["country"]["code"])
+                clients_list.append(clients)
+            trans.clients.extend(clients_list)
 
 
         return trans
@@ -163,7 +184,7 @@ class TrExtractor():
         trans.expenses_max=40000000
 
         transPerson.name = "Jochen Jochen"
-        
+
         trans.persons.extend([transPerson])
 
         self.producer.produce_to_topic(trans)
