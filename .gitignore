@@ -5,3 +5,4 @@ bakdata/*
 .idea
 __pycache__/
 neo4j/plugins
+.DS_Store
