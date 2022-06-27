@@ -83,7 +83,7 @@ financial services providers, insurance undertakings and securities trading.
 The website also contains registered announcements of managers’ transactions pursuant to Article 19 of the MAR.
 These announcements describe the transaction details that an executive director (manager) of a company did in the
 stocks. The website holds the transaction information in a one-year time window.
-The first announcement has a message ID of `17987` at the time of this writing.
+The first announcement has a message ID of `18204` at the time of this writing.
 
 ### BaFin crawler
 
@@ -94,7 +94,7 @@ The crawler is initialized with a `message_id` at the beginning of the crawl and
 BaFin. This process is demonstrated in the script below:
 
 ```shell
-export MESSAGE_ID="17987"
+export MESSAGE_ID="18204"
 curl -X GET  https://portal.mvp.bafin.de/database/DealingsInfo/ergebnisListe.do?cmd=loadEmittentenAction&meldepflichtigerId=$MEESAGE_ID
 ```
 
@@ -102,7 +102,7 @@ After retrieving the HTML of the page, the crawler extracts the `BaFin-ID` in th
 sends another request to retrieve the detailed transaction information. This is demonstrated with a shell script:
 
 ```shell
-export MESSAGE_ID="17987"
+export MESSAGE_ID="18204"
 export BAFIN_ID=40002082
 https://portal.mvp.bafin.de/database/DealingsInfo/transaktionListe.do?cmd=loadTransaktionenAction&emittentBafinId=$BAFIN_ID&meldungId=$MESSAGE_ID&KeepThis=true&TB_iframe=true&modal=true
 ```
