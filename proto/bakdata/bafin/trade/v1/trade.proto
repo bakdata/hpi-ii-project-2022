@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package bakdata.bafin.trade.v1;
+
+message Trade {
+  string id = 1;
+  string instrument_type = 2;
+  string isin = 3;
+  string type = 4;
+  string description = 5;
+  string price = 6;
+  string total = 7;
+  string date = 8;
+  string place = 9;
+  string mic = 10;
+  string person_id = 11;
+}

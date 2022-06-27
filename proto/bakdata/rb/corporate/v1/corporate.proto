@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package bakdata.rb.corporate.v1;
+
+message Corporate {
+  // generated hash from lower case and removed whitespace of company name
+  string id = 1;
+  string reference_id = 2;
+  string name = 3;
+  string street = 4;
+  string postal_code = 5;
+  string city = 6;
+}

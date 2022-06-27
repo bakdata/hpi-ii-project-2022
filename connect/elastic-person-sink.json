@@ -1,0 +1,18 @@
+{
+  "name": "elastic-person-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "topics": "rb-persons,bafin-persons",
+    "input.data.format": "PROTOBUF",
+    "connection.url": "http://elasticsearch:9200",
+    "key.ignore": "false",
+    "schema.ignore": "true",
+    "tasks.max": "1",
+    "write.method": "UPSERT",
+
+    "transforms": "renameTopics",
+    "transforms.renameTopics.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.renameTopics.regex": ".*-persons",
+    "transforms.renameTopics.replacement": "persons"
+  }
+}

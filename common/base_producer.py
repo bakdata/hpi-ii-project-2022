@@ -1,44 +1,50 @@
 import logging
-
+from abc import ABC, abstractmethod
+from typing import TypeVar
 from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.protobuf import ProtobufSerializer
 from confluent_kafka.serialization import StringSerializer
 
-from build.gen.bakdata.corporate.v1 import corporate_pb2
-from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate
-from rb_crawler.constant import SCHEMA_REGISTRY_URL, BOOTSTRAP_SERVER, TOPIC
-
+T = TypeVar("T")
 log = logging.getLogger(__name__)
 
 
-class RbProducer:
-    def __init__(self):
-        schema_registry_conf = {"url": SCHEMA_REGISTRY_URL}
+class BaseProducer(ABC):
+    BOOTSTRAP_SERVER: str = "localhost:29092"
+    SCHEMA_REGISTRY_URL: str = "http://localhost:8081"
+
+    def __init__(self, topic, schema):
+        self.topic = topic
+        schema_registry_conf = {"url": BaseProducer.SCHEMA_REGISTRY_URL}
         schema_registry_client = SchemaRegistryClient(schema_registry_conf)
 
         protobuf_serializer = ProtobufSerializer(
-            corporate_pb2.Corporate, schema_registry_client, {"use.deprecated.format": True}
+            schema, schema_registry_client, {"use.deprecated.format": True}
         )
 
         producer_conf = {
-            "bootstrap.servers": BOOTSTRAP_SERVER,
+            "bootstrap.servers": BaseProducer.BOOTSTRAP_SERVER,
             "key.serializer": StringSerializer("utf_8"),
             "value.serializer": protobuf_serializer,
         }
 
         self.producer = SerializingProducer(producer_conf)
 
-    def produce_to_topic(self, corporate: Corporate):
+    @abstractmethod
+    def get_key(self, message: T):
+        pass
+
+    def produce_to_topic(self, message: T):
         self.producer.produce(
-            topic=TOPIC, partition=-1, key=str(corporate.id), value=corporate, on_delivery=self.delivery_report
+            topic=self.topic, partition=-1, key=self.get_key(message), value=message,
+            on_delivery=self.delivery_report
         )
 
         # It is a naive approach to flush after each produce this can be optimised
         self.producer.poll()
 
-    @staticmethod
-    def delivery_report(err, msg):
+    def delivery_report(self, err, msg):
         """
         Reports the failure or success of a message delivery.
         Args:
@@ -56,7 +62,7 @@ class RbProducer:
             log.error("Delivery failed for User record {}: {}".format(msg.key(), err))
             return
         log.info(
-            "User record {} successfully produced to {} [{}] at offset {}".format(
+            "Record with key {} successfully produced to {} [{}] at offset {}".format(
                 msg.key(), msg.topic(), msg.partition(), msg.offset()
             )
         )

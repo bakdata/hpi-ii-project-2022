@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package bakdata.bafin.person.v1;
+
+message Person {
+  // Generated hash with first_name + last_name + company_name
+  string id = 1;
+  string title = 2;
+  string first_name = 3;
+  string last_name = 4;
+  Role role = 5;
+  string corporate_id = 6;
+}
+
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_EXECUTIVE_DIRECTOR = 1;
+}

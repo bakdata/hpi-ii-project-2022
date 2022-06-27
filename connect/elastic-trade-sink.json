@@ -1,0 +1,18 @@
+{
+  "name": "elastic-trade-sink",
+  "config": {
+    "connection.url": "http://elasticsearch:9200",
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "input.data.format": "PROTOBUF",
+    "key.ignore": "false",
+    "schema.ignore": "true",
+    "tasks.max": "1",
+    "topics": "bafin-trades",
+
+    "transforms": "renameTopics",
+    "transforms.renameTopics.regex": ".*-trades",
+    "transforms.renameTopics.replacement": "trades",
+    "transforms.renameTopics.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "write.method": "UPSERT"
+  }
+}

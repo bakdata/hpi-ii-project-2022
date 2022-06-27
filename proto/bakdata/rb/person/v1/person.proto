@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package bakdata.rb.person.v1;
+
+message Person {
+  // Generated hash from first_name + last_name + company_name
+  // All the strings are lowercase and all whitespaces are removed
+  // If the first name contains a middle name it should be removed
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string birthday = 4;
+  string birth_location = 5;
+  string corporate_id = 6;
+}
