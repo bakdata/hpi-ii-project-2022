@@ -13,7 +13,7 @@ can find the documentation for setting up the project.
 
 ## Architecture
 
-![](architecture.png)
+![](architecture-overview.png)
 
 ## Components
 
