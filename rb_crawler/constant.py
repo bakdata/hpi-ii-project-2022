@@ -1,7 +1,4 @@
 import enum
-import re
-
-RB_ERROR_TOPIC: str = "rb-errors"
 
 
 class State(str, enum.Enum):

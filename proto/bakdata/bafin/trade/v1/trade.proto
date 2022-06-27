@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-
 package bakdata.bafin.trade.v1;
 
 message Trade {
