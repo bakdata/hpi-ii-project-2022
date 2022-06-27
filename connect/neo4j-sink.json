@@ -1,0 +1,16 @@
+{
+  "name": "Neo4jSinkConnector",
+  "config": {
+    "topics": "rb-persons, corporates",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.encryption.enabled": false,
+    "neo4j.topic.cypher.corporates": "Merge(c:Corporate{id:event.id}) SET c.name = event.name",
+    "neo4j.topic.cypher.persons": "Merge(p:Person{id: event.id}) SET p.first_name = event.first_name, p.role = event.role Merge(c:Corporate{id:event.corporate_id}) With p, c CALL apoc.merge.relationship(p, p.role,{}, {}, c) YIELD rel return rel"
+  }
+}

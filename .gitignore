@@ -1,4 +1,7 @@
 venv/
-build/gen/bakdata/corporate/v1/*_pb2.py
+bakdata/*
+!bakdata/.gitkeep
+!proto/bakdata/
 .idea
 __pycache__/
+neo4j/plugins

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package bakdata.announcement.v1;
+
+message Announcement {
+  string id = 1;
+  string reference_id = 2;
+  string event_date = 3;
+  Type type = 4;
+  string information = 5;
+}
+
+enum Type {
+  TYPE_UNSPECIFIED = 0;
+  TYPE_NEW_ENTRY = 1;
+  TYPE_UPDATE = 2;
+  TYPE_DELETE = 3;
+}

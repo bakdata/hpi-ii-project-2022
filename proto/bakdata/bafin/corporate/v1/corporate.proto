@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package bakdata.bafin.corporate.v1;
+
+message Corporate {
+  string id = 1;
+  string bafin_id = 2;
+  string lei = 3;
+  string name = 4;
+  string street = 5;
+  string postal_code = 6;
+  string city = 7;
+  string country = 8;
+}
