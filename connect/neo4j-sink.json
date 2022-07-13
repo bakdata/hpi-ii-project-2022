@@ -1,7 +1,7 @@
 {
   "name": "Neo4jSinkConnector",
   "config": {
-    "topics": "rb-persons, corporates",
+    "topics": "persons, corporates",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
     "errors.retry.timeout": "-1",
     "errors.retry.delay.max.ms": "1000",
