@@ -5,6 +5,7 @@ can find the documentation for setting up the project.
 
 ## Prerequisites
 
+- Install [Python 3.10.5](https://www.python.org/downloads/release/python-3105/)
 - Install [Poetry](https://python-poetry.org/docs/#installation)
 - Install [Docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/)
 - Install [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/). If you are using windows you can
