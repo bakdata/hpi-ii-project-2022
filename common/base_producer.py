@@ -20,7 +20,7 @@ class BaseProducer(ABC):
         schema_registry_client = SchemaRegistryClient(schema_registry_conf)
 
         protobuf_serializer = ProtobufSerializer(
-            schema, schema_registry_client, {"use.deprecated.format": True}
+            schema, schema_registry_client, {"use.deprecated.format": False}
         )
 
         producer_conf = {
