@@ -79,16 +79,16 @@ services:
     ports:
       - "8082:8082"
 
-  kowl:
-    image: quay.io/cloudhut/kowl:v1.5.0
-    container_name: kowl
+  console:
+    image: vectorized/console:v2.0.2
+    container_name: console
     restart: on-failure
-    hostname: kowl
+    hostname: console
     volumes:
-      - ./kowl-config.yaml:/etc/kowl/kowl-config.yaml
+      - ./console-config.yaml:/etc/console/console-config.yaml
     ports:
       - "8080:8080"
-    entrypoint: ./kowl --config.filepath=/etc/kowl/kowl-config.yaml
+    entrypoint: ./console --config.filepath=/etc/console/console-config.yaml
     depends_on:
       - kafka
       - schema-registry

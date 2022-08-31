@@ -5,6 +5,7 @@ can find the documentation for setting up the project.
 
 ## Prerequisites
 
+- Install [Python 3.10.5](https://www.python.org/downloads/release/python-3105/)
 - Install [Poetry](https://python-poetry.org/docs/#installation)
 - Install [Docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/)
 - Install [Protobuf compiler (protoc)](https://grpc.io/docs/protoc-installation/). If you are using windows you can
@@ -83,7 +84,8 @@ financial services providers, insurance undertakings and securities trading.
 The website also contains registered announcements of managers’ transactions pursuant to Article 19 of the MAR.
 These announcements describe the transaction details that an executive director (manager) of a company did in the
 stocks. The website holds the transaction information in a one-year time window.
-The first announcement has a message ID of `18204` at the time of this writing.
+The first announcement has a message ID of `18794` at the time of this writing.
+You can find the message ID on this [page](https://portal.mvp.bafin.de/database/DealingsInfo/sucheForm.do).
 
 ### BaFin crawler
 
@@ -94,7 +96,7 @@ The crawler is initialized with a `message_id` at the beginning of the crawl and
 BaFin. This process is demonstrated in the script below:
 
 ```shell
-export MESSAGE_ID="18204"
+export MESSAGE_ID="18794"
 curl -X GET  https://portal.mvp.bafin.de/database/DealingsInfo/ergebnisListe.do?cmd=loadEmittentenAction&meldepflichtigerId=$MEESAGE_ID
 ```
 
@@ -102,7 +104,7 @@ After retrieving the HTML of the page, the crawler extracts the `BaFin-ID` in th
 sends another request to retrieve the detailed transaction information. This is demonstrated with a shell script:
 
 ```shell
-export MESSAGE_ID="18204"
+export MESSAGE_ID="18794"
 export BAFIN_ID=40002082
 https://portal.mvp.bafin.de/database/DealingsInfo/transaktionListe.do?cmd=loadTransaktionenAction&emittentBafinId=$BAFIN_ID&meldungId=$MESSAGE_ID&KeepThis=true&TB_iframe=true&modal=true
 ```
@@ -156,7 +158,7 @@ under the [`bakdata`](bakdata) folder.
 Use `docker-compose up -d` to start all the services: [Zookeeper](https://zookeeper.apache.org/)
 , [Kafka](https://kafka.apache.org/), [Schema
 Registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
-, [Kafka REST Proxy]((https://github.com/confluentinc/kafka-rest)), [Kowl](https://github.com/redpanda-data/kowl),
+, [Kafka REST Proxy]((https://github.com/confluentinc/kafka-rest)), [Redpanda Console](https://github.com/redpanda-data/console),
 [Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html),
 and [Elasticsearch](https://www.elastic.co/elasticsearch/). Depending on your system, it takes a couple of minutes
 before the services are up and running. You can use a tool
@@ -177,16 +179,16 @@ the [official documentation page](https://docs.confluent.io/kafka-connect-elasti
 Details on configuring the Neo4j sink connector are available on the
 [official documentation page](https://neo4j.com/labs/kafka/4.0/kafka-connect/).
 
-To start the connector, you must push the JSON config file to Kafka. You can use the UI dashboard in Kowl or
+To start the connector, you must push the JSON config file to Kafka. You can use the UI dashboard in Redpanda Console or
 the [bash script provided](./connect/push-config.sh). It is possible to remove a connector by deleting it
-through Kowl's UI dashboard or calling the deletion API in the [bash script provided](./connect/delete-config.sh).
+through Redpanda's Console or calling the deletion API in the [bash script provided](./connect/delete-config.sh).
 
 ### RB crawler
 
 You can start the crawler with the command below:
 
 ```shell
-poetry run python rb_crawler/main.py --id $RB_ID --state $STATE
+poetry run python -m rb_crawler.main --id $RB_ID --state $STATE
 ```
 
 The `--id` option is an integer, which determines the initial event in the Handelsregisterbekanntmachungen to be
@@ -212,7 +214,7 @@ Options:
 You can start the crawler with the command below:
 
 ```shell
-poetry run python rb_crawler/main.py --id $MESSAGE_ID
+poetry run python -m bafin_crawler.main --id $MESSAGE_ID
 ```
 
 The `--id` option is an integer, which determines the initial event in the BaFin portal to be
@@ -230,11 +232,11 @@ Options:
 
 ## Query data
 
-### Kowl
+### Redpanda Console
 
-[Kowl](https://github.com/redpanda-data/kowl) is a web application that helps you manage and debug your Kafka workloads
+[Redpanda Console](https://github.com/redpanda-data/console) is a web application that helps you manage and debug your Kafka workloads
 effortlessly. You can create, update, and delete Kafka resources like Topics and Kafka Connect configs.
-You can see Kowl's dashboard in your browser under http://localhost:8080.
+You can open Redpanda Console in your browser under http://localhost:8080.
 
 ### Elasticsearch
 
