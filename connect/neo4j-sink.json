@@ -1,5 +1,5 @@
 {
-  "name": "Neo4jSinkConnector",
+  "name": "neo4j-sink",
   "config": {
     "topics": "persons, corporates",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
