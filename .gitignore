@@ -1,5 +1,6 @@
 venv/
 bakdata/*
+!bakdata/__init__.py
 !bakdata/.gitkeep
 !proto/bakdata/
 .idea

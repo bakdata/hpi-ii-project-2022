@@ -157,8 +157,7 @@ under the [`bakdata`](bakdata) folder.
 
 Use `docker-compose up -d` to start all the services: [Zookeeper](https://zookeeper.apache.org/)
 , [Kafka](https://kafka.apache.org/), [Schema
-Registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
-, [Kafka REST Proxy]((https://github.com/confluentinc/kafka-rest)), [Redpanda Console](https://github.com/redpanda-data/console),
+Registry](https://docs.confluent.io/platform/current/schema-registry/index.html), [Redpanda Console](https://github.com/redpanda-data/console),
 [Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html),
 and [Elasticsearch](https://www.elastic.co/elasticsearch/). Depending on your system, it takes a couple of minutes
 before the services are up and running. You can use a tool
